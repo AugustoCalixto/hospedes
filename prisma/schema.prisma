@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccommodationType {
+  CHALE
+  CASA
+  QUARTO
+}
+
+enum ReservationStatus {
+  SOLICITADA
+  PENDENTE
+  CONFIRMADA
+  CANCELADA
+  FINALIZADA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model City {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String          @db.Text
+  heroImage   String?
+  attractions Json            @default("[]")
+  gallery     Json            @default("[]")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  accommodations Accommodation[]
+
+  @@index([slug])
+}
+
+model Accommodation {
+  id            String              @id @default(cuid())
+  cityId        String
+  name          String
+  slug          String              @unique
+  type          AccommodationType
+  maxGuests     Int
+  bedrooms      Int
+  beds          Int
+  bathrooms     Int
+  pricePerNight Decimal             @db.Decimal(10, 2)
+  description   String              @db.Text
+  amenities     Json                @default("[]")
+  rules         Json                @default("[]")
+  lat           Float?
+  lng           Float?
+  featured      Boolean             @default(false)
+  published     Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  city          City                @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  photos        AccommodationPhoto[]
+  blocks        AvailabilityBlock[]
+  reservations  Reservation[]
+
+  @@index([cityId])
+  @@index([slug])
+  @@index([published])
+}
+
+model AccommodationPhoto {
+  id              String        @id @default(cuid())
+  accommodationId String
+  url             String
+  alt             String?
+  sortOrder       Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  @@index([accommodationId])
+}
+
+model AvailabilityBlock {
+  id              String        @id @default(cuid())
+  accommodationId String
+  startDate       DateTime      @db.Date
+  endDate         DateTime      @db.Date
+  reason          String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  @@index([accommodationId])
+  @@index([startDate, endDate])
+}
+
+model Reservation {
+  id              String            @id @default(cuid())
+  accommodationId String
+  checkIn         DateTime          @db.Date
+  checkOut        DateTime          @db.Date
+  guestName       String
+  guestPhone      String
+  guestEmail      String
+  guestCount      Int
+  status          ReservationStatus @default(SOLICITADA)
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  accommodation   Accommodation     @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  @@index([accommodationId])
+  @@index([status])
+  @@index([checkIn, checkOut])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  guestName String
+  rating    Int
+  content   String   @db.Text
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  siteName        String   @default("Pousada & Locações")
+  homeHeroTitle   String   @default("Sua estadia perfeita")
+  homeHeroSubtitle String  @default("Chalés e casas em destinos incríveis")
+  homeHeroImages  Json     @default("[]")
+  aboutTitle      String   @default("Sobre Nós")
+  aboutContent    String   @db.Text @default("")
+  contactPhone    String?
+  contactWhatsapp String?
+  contactEmail    String?
+  contactAddress  String?
+  socialInstagram String?
+  socialFacebook  String?
+  mapLat          Float?
+  mapLng          Float?
+  notificationEmail String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+}
