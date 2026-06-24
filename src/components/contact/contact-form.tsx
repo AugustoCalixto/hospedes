@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 export function ContactForm() {
   const [loading, setLoading] = useState(false);
@@ -55,7 +56,7 @@ export function ContactForm() {
       </div>
       <div>
         <Label htmlFor="phone">Telefone</Label>
-        <Input id="phone" name="phone" />
+        <PhoneInput id="phone" name="phone" />
       </div>
       <div>
         <Label htmlFor="message">Mensagem</Label>

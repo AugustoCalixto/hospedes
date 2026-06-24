@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
-import { createAvailabilityBlock, deleteAvailabilityBlock } from "@/lib/admin-actions";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { formatInclusivePeriod } from "@/lib/availability";
+import { deleteAvailabilityBlock } from "@/lib/admin-actions";
+import { BlockForm } from "@/components/admin/block-form";
 import { Button } from "@/components/ui/button";
 import { RESERVATION_STATUS_LABELS } from "@/lib/validations";
 
@@ -23,41 +23,11 @@ export default async function AdminCalendarPage() {
       <h1 className="text-2xl font-bold">Calendário</h1>
       <p className="mt-2 text-stone-600">Gerencie bloqueios e visualize ocupação</p>
 
-      <form
-        action={createAvailabilityBlock}
-        className="mt-8 grid gap-4 rounded-xl border border-stone-200 bg-white p-6 md:grid-cols-5"
-      >
-        <div>
-          <Label htmlFor="accommodationId">Acomodação</Label>
-          <select
-            id="accommodationId"
-            name="accommodationId"
-            className="flex h-10 w-full rounded-lg border border-stone-300 px-3 text-sm"
-            required
-          >
-            {accommodations.map((acc) => (
-              <option key={acc.id} value={acc.id}>
-                {acc.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <Label htmlFor="startDate">Início</Label>
-          <Input id="startDate" name="startDate" type="date" required />
-        </div>
-        <div>
-          <Label htmlFor="endDate">Fim</Label>
-          <Input id="endDate" name="endDate" type="date" required />
-        </div>
-        <div>
-          <Label htmlFor="reason">Motivo</Label>
-          <Input id="reason" name="reason" placeholder="Manutenção, etc." />
-        </div>
-        <div className="flex items-end">
-          <Button type="submit" className="w-full">Bloquear</Button>
-        </div>
-      </form>
+      <div className="mt-8">
+        <BlockForm
+          accommodations={accommodations.map((a) => ({ id: a.id, name: a.name }))}
+        />
+      </div>
 
       <div className="mt-12 space-y-8">
         {accommodations.map((acc) => (
@@ -73,7 +43,7 @@ export default async function AdminCalendarPage() {
                   {acc.blocks.map((block) => (
                     <li key={block.id} className="flex items-center justify-between text-sm">
                       <span>
-                        {formatDate(block.startDate)} — {formatDate(block.endDate)}
+                        {formatInclusivePeriod(block.startDate, block.endDate)}
                         {block.reason && ` (${block.reason})`}
                       </span>
                       <form action={deleteAvailabilityBlock.bind(null, block.id)}>

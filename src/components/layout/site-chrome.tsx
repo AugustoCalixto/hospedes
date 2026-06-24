@@ -6,6 +6,7 @@ import { buildWhatsAppLink } from "@/lib/notifications";
 const navLinks = [
   { href: "/", label: "Início" },
   { href: "/acomodacoes", label: "Acomodações" },
+  { href: "/reserva", label: "Minha reserva" },
   { href: "/sobre", label: "Sobre" },
   { href: "/contato", label: "Contato" },
 ];

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 type Props = {
   accommodationId: string;
@@ -21,6 +24,7 @@ export function ReservationForm({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [reservationCode, setReservationCode] = useState("");
   const [error, setError] = useState("");
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
@@ -43,6 +47,7 @@ export function ReservationForm({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao enviar solicitação");
 
+      setReservationCode(data.code || "");
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado");
@@ -57,9 +62,22 @@ export function ReservationForm({
         <h3 className="text-lg font-semibold text-emerald-800">
           Solicitação enviada!
         </h3>
-        <p className="mt-2 text-sm text-emerald-700">
-          Entraremos em contato em breve para confirmar sua reserva.
+        {reservationCode && (
+          <div className="mt-4 rounded-lg bg-white px-4 py-3">
+            <p className="text-sm text-stone-600">Seu código de reserva</p>
+            <p className="mt-1 font-mono text-xl font-bold tracking-wider text-emerald-800">
+              {reservationCode}
+            </p>
+          </div>
+        )}
+        <p className="mt-4 text-sm text-emerald-700">
+          Guarde este código para acompanhar o status da sua reserva.
         </p>
+        {reservationCode && (
+          <Button asChild className="mt-4" variant="outline">
+            <Link href={`/reserva?codigo=${reservationCode}`}>Consultar status</Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -68,30 +86,19 @@ export function ReservationForm({
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-stone-200 bg-white p-6">
       <h3 className="text-lg font-semibold">Solicitar reserva</h3>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="checkIn">Check-in</Label>
-          <Input
-            id="checkIn"
-            name="checkIn"
-            type="date"
-            required
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="checkOut">Check-out</Label>
-          <Input
-            id="checkOut"
-            name="checkOut"
-            type="date"
-            required
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-          />
-        </div>
-      </div>
+      <DateRangePicker
+        startName="checkIn"
+        endName="checkOut"
+        label="Período da estadia"
+        defaultStart={initialCheckIn}
+        defaultEnd={initialCheckOut}
+        required
+        numberOfMonths={1}
+        onChange={(start, end) => {
+          setCheckIn(start);
+          setCheckOut(end);
+        }}
+      />
 
       <div>
         <Label htmlFor="guestName">Nome completo</Label>
@@ -101,7 +108,7 @@ export function ReservationForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="guestPhone">Telefone</Label>
-          <Input id="guestPhone" name="guestPhone" required />
+          <PhoneInput id="guestPhone" name="guestPhone" required />
         </div>
         <div>
           <Label htmlFor="guestEmail">E-mail</Label>

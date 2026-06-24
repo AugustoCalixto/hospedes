@@ -48,6 +48,7 @@ export default async function AdminReservationsPage({ searchParams }: Props) {
           <div key={r.id} className="rounded-xl border border-stone-200 bg-white p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
+                <p className="font-mono text-xs text-stone-400">{r.code}</p>
                 <p className="font-semibold">{r.guestName}</p>
                 <p className="text-sm text-stone-600">{r.accommodation.name}</p>
                 <p className="mt-2 text-sm">

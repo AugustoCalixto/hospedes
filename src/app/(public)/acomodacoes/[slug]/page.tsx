@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getAccommodationBySlug } from "@/lib/accommodations";
 import { getSiteSettings, buildWhatsAppLink } from "@/lib/notifications";
 import { formatCurrency } from "@/lib/utils";
-import { ACCOMMODATION_TYPE_LABELS } from "@/lib/validations";
+import { getAccommodationTypeLabel } from "@/lib/validations";
 import { BookingSection } from "@/components/booking/booking-section";
 import { ShareButton } from "@/components/accommodation/share-button";
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,7 @@ export default async function AccommodationDetailPage({ params }: Props) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-emerald-700">
-            {ACCOMMODATION_TYPE_LABELS[accommodation.type]} · {accommodation.city.name}
+            {getAccommodationTypeLabel(accommodation.type)} · {accommodation.city.name}
           </p>
           <h1 className="mt-1 text-3xl font-bold">{accommodation.name}</h1>
         </div>

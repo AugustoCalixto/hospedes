@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { format } from "date-fns";
 import { getOccupiedRanges } from "@/lib/accommodations";
-import { getUnavailableDates } from "@/lib/availability";
+import { getUnavailableDates, parseDateOnly } from "@/lib/availability";
 
 export async function GET(request: NextRequest) {
   const accommodationId = request.nextUrl.searchParams.get("accommodationId");
@@ -17,13 +16,11 @@ export async function GET(request: NextRequest) {
     const unavailable = getUnavailableDates(
       blocks,
       reservations,
-      new Date(from),
-      new Date(to),
+      parseDateOnly(from),
+      parseDateOnly(to),
     );
 
-    return NextResponse.json({
-      unavailableDates: unavailable.map((d) => format(d, "yyyy-MM-dd")),
-    });
+    return NextResponse.json({ unavailableDates: unavailable });
   } catch {
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }

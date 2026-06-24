@@ -48,6 +48,7 @@ export async function sendNotificationEmail(
 }
 
 export async function notifyNewReservation(data: {
+  code: string;
   accommodationName: string;
   guestName: string;
   guestEmail: string;
@@ -60,6 +61,7 @@ export async function notifyNewReservation(data: {
   const subject = `Nova solicitação de reserva — ${data.accommodationName}`;
   const html = `
     <h2>Nova solicitação de reserva</h2>
+    <p><strong>Código:</strong> ${data.code}</p>
     <p><strong>Acomodação:</strong> ${data.accommodationName}</p>
     <p><strong>Hóspede:</strong> ${data.guestName}</p>
     <p><strong>E-mail:</strong> ${data.guestEmail}</p>

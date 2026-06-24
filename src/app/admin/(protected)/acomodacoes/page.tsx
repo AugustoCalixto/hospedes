@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
-import { ACCOMMODATION_TYPE_LABELS } from "@/lib/validations";
+import { getAccommodationTypeLabel } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -40,7 +40,7 @@ export default async function AdminAccommodationsPage() {
               <tr key={acc.id} className="border-b border-stone-100">
                 <td className="p-4 font-medium">{acc.name}</td>
                 <td className="p-4">{acc.city.name}</td>
-                <td className="p-4">{ACCOMMODATION_TYPE_LABELS[acc.type]}</td>
+                <td className="p-4">{getAccommodationTypeLabel(acc.type)}</td>
                 <td className="p-4">{formatCurrency(acc.pricePerNight.toString())}</td>
                 <td className="p-4">
                   <span

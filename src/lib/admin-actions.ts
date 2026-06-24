@@ -12,12 +12,43 @@ import {
   reviewSchema,
   siteSettingsSchema,
 } from "@/lib/validations";
+import { parseDateOnly, toExclusiveEnd } from "@/lib/availability";
 import type { ReservationStatus } from "@prisma/client";
 
 async function requireAuth() {
   const session = await auth();
   if (!session) redirect("/admin/login");
   return session;
+}
+
+function parseJsonArray(value: FormDataEntryValue | null): string[] {
+  if (!value) return [];
+  const str = value.toString();
+  try {
+    const parsed = JSON.parse(str);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return str.split("\n").filter(Boolean);
+  }
+}
+
+export async function createCityQuick(name: string) {
+  await requireAuth();
+  const slug = slugify(name);
+  const existing = await prisma.city.findUnique({ where: { slug } });
+  if (existing) return existing;
+
+  const city = await prisma.city.create({
+    data: {
+      name,
+      slug,
+      description: `Descubra nossas acomodações em ${name}.`,
+    },
+  });
+
+  revalidatePath("/admin/acomodacoes");
+  revalidatePath("/admin/conteudo");
+  return city;
 }
 
 export async function createAccommodation(formData: FormData) {
@@ -33,8 +64,8 @@ export async function createAccommodation(formData: FormData) {
     bathrooms: formData.get("bathrooms"),
     pricePerNight: formData.get("pricePerNight"),
     description: formData.get("description"),
-    amenities: formData.get("amenities")?.toString().split("\n").filter(Boolean) || [],
-    rules: formData.get("rules")?.toString().split("\n").filter(Boolean) || [],
+    amenities: parseJsonArray(formData.get("amenities")),
+    rules: parseJsonArray(formData.get("rules")),
     lat: formData.get("lat") || undefined,
     lng: formData.get("lng") || undefined,
     featured: formData.get("featured") === "on",
@@ -67,8 +98,8 @@ export async function updateAccommodation(id: string, formData: FormData) {
     bathrooms: formData.get("bathrooms"),
     pricePerNight: formData.get("pricePerNight"),
     description: formData.get("description"),
-    amenities: formData.get("amenities")?.toString().split("\n").filter(Boolean) || [],
-    rules: formData.get("rules")?.toString().split("\n").filter(Boolean) || [],
+    amenities: parseJsonArray(formData.get("amenities")),
+    rules: parseJsonArray(formData.get("rules")),
     lat: formData.get("lat") || undefined,
     lng: formData.get("lng") || undefined,
     featured: formData.get("featured") === "on",
@@ -126,8 +157,8 @@ export async function createAvailabilityBlock(formData: FormData) {
   await prisma.availabilityBlock.create({
     data: {
       ...parsed.data,
-      startDate: new Date(parsed.data.startDate),
-      endDate: new Date(parsed.data.endDate),
+      startDate: parseDateOnly(parsed.data.startDate),
+      endDate: toExclusiveEnd(parseDateOnly(parsed.data.endDate)),
     },
   });
 
@@ -152,8 +183,8 @@ export async function updateReservation(id: string, formData: FormData) {
   await prisma.reservation.update({
     where: { id },
     data: {
-      checkIn: new Date(formData.get("checkIn") as string),
-      checkOut: new Date(formData.get("checkOut") as string),
+      checkIn: parseDateOnly(formData.get("checkIn") as string),
+      checkOut: parseDateOnly(formData.get("checkOut") as string),
       guestCount: parseInt(formData.get("guestCount") as string),
       notes: formData.get("notes")?.toString() || null,
       status: formData.get("status") as ReservationStatus,

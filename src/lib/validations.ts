@@ -23,7 +23,7 @@ export const contactSchema = z.object({
 export const accommodationSchema = z.object({
   cityId: z.string().min(1),
   name: z.string().min(2).max(100),
-  type: z.enum(["CHALE", "CASA", "QUARTO"]),
+  type: z.string().min(2).max(50),
   maxGuests: z.coerce.number().int().min(1),
   bedrooms: z.coerce.number().int().min(0),
   beds: z.coerce.number().int().min(1),
@@ -82,6 +82,10 @@ export const ACCOMMODATION_TYPE_LABELS: Record<string, string> = {
   CASA: "Casa",
   QUARTO: "Quarto",
 };
+
+export function getAccommodationTypeLabel(type: string): string {
+  return ACCOMMODATION_TYPE_LABELS[type] || type;
+}
 
 export const RESERVATION_STATUS_LABELS: Record<string, string> = {
   SOLICITADA: "Solicitada",

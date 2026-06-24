@@ -3,6 +3,36 @@ export type DateRange = {
   endDate: Date;
 };
 
+/** Parse yyyy-MM-dd as UTC midnight (safe for @db.Date fields) */
+export function parseDateOnly(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+/** Format a date-only value without timezone shift */
+export function formatDateOnly(date: Date): string {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export function addDaysUTC(date: Date, days: number): Date {
+  const result = new Date(date.getTime());
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}
+
+/** UI inclusive end → storage exclusive end (hospitality convention) */
+export function toExclusiveEnd(inclusiveEnd: Date): Date {
+  return addDaysUTC(inclusiveEnd, 1);
+}
+
+/** Storage exclusive end → UI inclusive end for display */
+export function toInclusiveEnd(exclusiveEnd: Date): Date {
+  return addDaysUTC(exclusiveEnd, -1);
+}
+
 export function rangesOverlap(a: DateRange, b: DateRange): boolean {
   return a.startDate < b.endDate && b.startDate < a.endDate;
 }
@@ -21,36 +51,35 @@ export function getUnavailableDates(
   reservations: DateRange[],
   from: Date,
   to: Date,
-): Date[] {
-  const dates: Date[] = [];
-  const current = new Date(from);
-  current.setHours(0, 0, 0, 0);
-  const end = new Date(to);
-  end.setHours(0, 0, 0, 0);
+): string[] {
+  const dates: string[] = [];
+  let current = from;
 
-  while (current <= end) {
-    const dayStart = new Date(current);
-    const dayEnd = new Date(current);
-    dayEnd.setDate(dayEnd.getDate() + 1);
-
+  while (current.getTime() <= to.getTime()) {
+    const dayEnd = addDaysUTC(current, 1);
     const isBlocked = [...blocks, ...reservations].some((range) =>
-      rangesOverlap(
-        { startDate: dayStart, endDate: dayEnd },
-        range,
-      ),
+      rangesOverlap({ startDate: current, endDate: dayEnd }, range),
     );
 
     if (isBlocked) {
-      dates.push(new Date(current));
+      dates.push(formatDateOnly(current));
     }
 
-    current.setDate(current.getDate() + 1);
+    current = addDaysUTC(current, 1);
   }
 
   return dates;
 }
 
-export function parseDateOnly(value: string): Date {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
+/** Format an inclusive period for display (start → end inclusive) */
+export function formatInclusivePeriod(start: Date, exclusiveEnd: Date): string {
+  const startStr = formatDateOnly(start);
+
+  if (exclusiveEnd.getTime() <= start.getTime()) {
+    return startStr;
+  }
+
+  const endStr = formatDateOnly(toInclusiveEnd(exclusiveEnd));
+  if (startStr === endStr) return startStr;
+  return `${startStr} — ${endStr}`;
 }

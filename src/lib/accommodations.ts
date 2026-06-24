@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { parseDateOnly, isDateRangeAvailable } from "./availability";
+import { parseDateOnly, isDateRangeAvailable, toExclusiveEnd } from "./availability";
 import type { ReservationStatus } from "@prisma/client";
 
 const BLOCKING_STATUSES: ReservationStatus[] = ["PENDENTE", "CONFIRMADA"];
@@ -16,10 +16,13 @@ export async function getOccupiedRanges(accommodationId: string) {
   ]);
 
   return {
-    blocks: blocks.map((b) => ({
-      startDate: b.startDate,
-      endDate: b.endDate,
-    })),
+    blocks: blocks.map((b) => {
+      const end =
+        b.endDate.getTime() <= b.startDate.getTime()
+          ? toExclusiveEnd(b.startDate)
+          : b.endDate;
+      return { startDate: b.startDate, endDate: end };
+    }),
     reservations: reservations.map((r) => ({
       startDate: r.checkIn,
       endDate: r.checkOut,
@@ -50,9 +53,7 @@ export async function getPublishedAccommodations(filters?: {
     where: {
       published: true,
       ...(filters?.citySlug && { city: { slug: filters.citySlug } }),
-      ...(filters?.type && {
-        type: filters.type as "CHALE" | "CASA" | "QUARTO",
-      }),
+      ...(filters?.type && { type: filters.type }),
       ...(filters?.minGuests && { maxGuests: { gte: filters.minGuests } }),
       ...(filters?.minPrice && { pricePerNight: { gte: filters.minPrice } }),
       ...(filters?.maxPrice && { pricePerNight: { lte: filters.maxPrice } }),

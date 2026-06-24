@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.city.findMany({ select: { slug: true, updatedAt: true } }),
   ]);
 
-  const staticPages = ["", "/acomodacoes", "/sobre", "/contato"].map((path) => ({
+  const staticPages = ["", "/acomodacoes", "/reserva", "/sobre", "/contato"].map((path) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,

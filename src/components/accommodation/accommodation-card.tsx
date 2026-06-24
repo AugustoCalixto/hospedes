@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
-import { ACCOMMODATION_TYPE_LABELS } from "@/lib/validations";
+import { getAccommodationTypeLabel } from "@/lib/validations";
 import { Users, MapPin } from "lucide-react";
 import type { Accommodation, AccommodationPhoto, City } from "@prisma/client";
 
@@ -42,7 +42,7 @@ export function AccommodationCard({
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-              {ACCOMMODATION_TYPE_LABELS[accommodation.type]}
+              {getAccommodationTypeLabel(accommodation.type)}
             </p>
             <h3 className="mt-1 text-lg font-semibold text-stone-900">
               {accommodation.name}

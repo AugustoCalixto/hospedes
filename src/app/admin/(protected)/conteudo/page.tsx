@@ -6,6 +6,7 @@ import {
   deleteReview,
   updateCity,
 } from "@/lib/admin-actions";
+import { ContactSettingsFields } from "@/components/admin/contact-settings-fields";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,14 +53,10 @@ export default async function AdminContentPage() {
             <Label htmlFor="aboutContent">Conteúdo sobre</Label>
             <Textarea id="aboutContent" name="aboutContent" rows={6} defaultValue={settings.aboutContent} />
           </div>
-          <div>
-            <Label htmlFor="contactPhone">Telefone</Label>
-            <Input id="contactPhone" name="contactPhone" defaultValue={settings.contactPhone || ""} />
-          </div>
-          <div>
-            <Label htmlFor="contactWhatsapp">WhatsApp (com DDI)</Label>
-            <Input id="contactWhatsapp" name="contactWhatsapp" defaultValue={settings.contactWhatsapp || ""} />
-          </div>
+          <ContactSettingsFields
+            contactPhone={settings.contactPhone}
+            contactWhatsapp={settings.contactWhatsapp}
+          />
           <div>
             <Label htmlFor="contactEmail">E-mail contato</Label>
             <Input id="contactEmail" name="contactEmail" defaultValue={settings.contactEmail || ""} />

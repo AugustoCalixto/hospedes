@@ -63,6 +63,7 @@ export default async function AdminDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-stone-500">
+                  <th className="pb-2 pr-4">Código</th>
                   <th className="pb-2 pr-4">Hóspede</th>
                   <th className="pb-2 pr-4">Acomodação</th>
                   <th className="pb-2 pr-4">Período</th>
@@ -72,6 +73,7 @@ export default async function AdminDashboard() {
               <tbody>
                 {recentReservations.map((r) => (
                   <tr key={r.id} className="border-b border-stone-100">
+                    <td className="py-3 pr-4 font-mono text-xs">{r.code}</td>
                     <td className="py-3 pr-4">{r.guestName}</td>
                     <td className="py-3 pr-4">{r.accommodation.name}</td>
                     <td className="py-3 pr-4">

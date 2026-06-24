@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum AccommodationType {
-  CHALE
-  CASA
-  QUARTO
-}
-
 enum ReservationStatus {
   SOLICITADA
   PENDENTE
@@ -50,7 +44,7 @@ model Accommodation {
   cityId        String
   name          String
   slug          String              @unique
-  type          AccommodationType
+  type          String
   maxGuests     Int
   bedrooms      Int
   beds          Int
@@ -104,6 +98,7 @@ model AvailabilityBlock {
 
 model Reservation {
   id              String            @id @default(cuid())
+  code            String            @unique
   accommodationId String
   checkIn         DateTime          @db.Date
   checkOut        DateTime          @db.Date
@@ -120,6 +115,7 @@ model Reservation {
   @@index([accommodationId])
   @@index([status])
   @@index([checkIn, checkOut])
+  @@index([code])
 }
 
 model Review {

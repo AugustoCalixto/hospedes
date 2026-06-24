@@ -5,6 +5,7 @@ import { reservationSchema } from "@/lib/validations";
 import { checkAvailability } from "@/lib/accommodations";
 import { notifyNewReservation } from "@/lib/notifications";
 import { parseDateOnly } from "@/lib/availability";
+import { createUniqueReservationCode } from "@/lib/reservations";
 
 const rateLimit = new Map<string, number[]>();
 
@@ -69,8 +70,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Período indisponível" }, { status: 409 });
     }
 
+    const code = await createUniqueReservationCode();
+
     const reservation = await prisma.reservation.create({
       data: {
+        code,
         accommodationId: parsed.data.accommodationId,
         checkIn,
         checkOut,
@@ -85,6 +89,7 @@ export async function POST(request: NextRequest) {
     });
 
     await notifyNewReservation({
+      code: reservation.code,
       accommodationName: reservation.accommodation.name,
       guestName: reservation.guestName,
       guestEmail: reservation.guestEmail,
@@ -94,7 +99,7 @@ export async function POST(request: NextRequest) {
       guestCount: reservation.guestCount,
     });
 
-    return NextResponse.json({ id: reservation.id }, { status: 201 });
+    return NextResponse.json({ id: reservation.id, code: reservation.code }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
