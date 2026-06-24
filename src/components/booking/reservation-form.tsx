@@ -2,32 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { format, parse } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 type Props = {
   accommodationId: string;
   maxGuests: number;
-  initialCheckIn?: string;
-  initialCheckOut?: string;
+  checkIn?: string;
+  checkOut?: string;
 };
+
+function formatStayDate(date: string) {
+  return format(parse(date, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: ptBR });
+}
 
 export function ReservationForm({
   accommodationId,
   maxGuests,
-  initialCheckIn = "",
-  initialCheckOut = "",
+  checkIn = "",
+  checkOut = "",
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [reservationCode, setReservationCode] = useState("");
   const [error, setError] = useState("");
-  const [checkIn, setCheckIn] = useState(initialCheckIn);
-  const [checkOut, setCheckOut] = useState(initialCheckOut);
+  const hasDates = Boolean(checkIn && checkOut);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -86,19 +90,18 @@ export function ReservationForm({
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-stone-200 bg-white p-6">
       <h3 className="text-lg font-semibold">Solicitar reserva</h3>
 
-      <DateRangePicker
-        startName="checkIn"
-        endName="checkOut"
-        label="Período da estadia"
-        defaultStart={initialCheckIn}
-        defaultEnd={initialCheckOut}
-        required
-        numberOfMonths={1}
-        onChange={(start, end) => {
-          setCheckIn(start);
-          setCheckOut(end);
-        }}
-      />
+      {hasDates ? (
+        <div className="rounded-lg bg-emerald-50 px-4 py-3">
+          <p className="text-sm font-medium text-emerald-900">Período selecionado</p>
+          <p className="mt-1 text-sm text-emerald-800">
+            Check-in: {formatStayDate(checkIn)} · Check-out: {formatStayDate(checkOut)}
+          </p>
+        </div>
+      ) : (
+        <p className="rounded-lg border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-500">
+          Selecione check-in e check-out no calendário ao lado para continuar.
+        </p>
+      )}
 
       <div>
         <Label htmlFor="guestName">Nome completo</Label>
@@ -138,7 +141,7 @@ export function ReservationForm({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading || !hasDates}>
         {loading ? "Enviando..." : "Enviar solicitação"}
       </Button>
     </form>

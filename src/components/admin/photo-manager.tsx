@@ -11,9 +11,10 @@ type Props = {
   photos: AccommodationPhoto[];
   onAdd: (accommodationId: string, url: string, alt?: string) => Promise<void>;
   onDelete: (id: string, accommodationId: string) => Promise<void>;
+  disabled?: boolean;
 };
 
-export function PhotoManager({ accommodationId, photos, onAdd, onDelete }: Props) {
+export function PhotoManager({ accommodationId, photos, onAdd, onDelete, disabled }: Props) {
   const router = useRouter();
 
   async function handleUploaded(url: string) {
@@ -27,27 +28,45 @@ export function PhotoManager({ accommodationId, photos, onAdd, onDelete }: Props
   }
 
   return (
-    <div className="mt-4 space-y-4 rounded-xl border border-stone-200 bg-white p-4">
-      <PhotoUploader accommodationId={accommodationId} onUploaded={handleUploaded} />
+    <div className="space-y-6">
+      <PhotoUploader onUploaded={handleUploaded} disabled={disabled} />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {photos.map((photo) => (
-          <div key={photo.id} className="relative">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-100">
-              <Image src={photo.url} alt={photo.alt || ""} fill className="object-cover" sizes="200px" />
-            </div>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              className="mt-2"
-              onClick={() => handleDelete(photo.id)}
-            >
-              Remover
-            </Button>
+      {photos.length > 0 ? (
+        <div>
+          <p className="mb-3 text-sm font-medium text-stone-600">
+            {photos.length} foto{photos.length !== 1 ? "s" : ""} cadastrada{photos.length !== 1 ? "s" : ""}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.map((photo) => (
+              <div key={photo.id} className="group relative">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-stone-100">
+                  <Image
+                    src={photo.url}
+                    alt={photo.alt || ""}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="mt-2 w-full"
+                  onClick={() => handleDelete(photo.id)}
+                  disabled={disabled}
+                >
+                  Remover
+                </Button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <p className="text-sm text-stone-500">
+          Nenhuma foto cadastrada. A primeira imagem será usada como capa no site.
+        </p>
+      )}
     </div>
   );
 }

@@ -14,10 +14,13 @@ import { ArrowLeft } from "lucide-react";
 
 type Props = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ novo?: string }>;
 };
 
-export default async function EditAccommodationPage({ params }: Props) {
+export default async function EditAccommodationPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { novo } = await searchParams;
+
   const accommodation = await prisma.accommodation.findUnique({
     where: { id },
     include: { photos: { orderBy: { sortOrder: "asc" } } },
@@ -38,6 +41,12 @@ export default async function EditAccommodationPage({ params }: Props) {
       </Link>
       <h1 className="mt-4 text-2xl font-bold">Editar: {accommodation.name}</h1>
 
+      {novo === "1" && (
+        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Acomodação criada com sucesso. Adicione as fotos abaixo para publicá-la no site.
+        </div>
+      )}
+
       <div className="mt-8 space-y-8">
         <AccommodationForm
           cities={cities}
@@ -47,12 +56,17 @@ export default async function EditAccommodationPage({ params }: Props) {
 
         <section className="rounded-xl border border-stone-200 bg-white p-6">
           <h2 className="text-lg font-semibold">Fotos</h2>
-          <PhotoManager
-            accommodationId={id}
-            photos={accommodation.photos}
-            onAdd={addAccommodationPhoto}
-            onDelete={deleteAccommodationPhoto}
-          />
+          <p className="mt-1 text-sm text-stone-500">
+            Arraste imagens para a área abaixo ou clique para selecionar arquivos.
+          </p>
+          <div className="mt-4">
+            <PhotoManager
+              accommodationId={id}
+              photos={accommodation.photos}
+              onAdd={addAccommodationPhoto}
+              onDelete={deleteAccommodationPhoto}
+            />
+          </div>
         </section>
       </div>
 

@@ -76,13 +76,13 @@ export async function createAccommodation(formData: FormData) {
   if (!parsed.success) throw new Error("Dados inválidos");
 
   const slug = slugify(parsed.data.name);
-  await prisma.accommodation.create({
+  const created = await prisma.accommodation.create({
     data: { ...parsed.data, slug },
   });
 
   revalidatePath("/admin/acomodacoes");
   revalidatePath("/acomodacoes");
-  redirect("/admin/acomodacoes");
+  redirect(`/admin/acomodacoes/${created.id}?novo=1`);
 }
 
 export async function updateAccommodation(id: string, formData: FormData) {

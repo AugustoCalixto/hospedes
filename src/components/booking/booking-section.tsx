@@ -39,8 +39,8 @@ export function BookingSection({ accommodationId, maxGuests }: Props) {
       <ReservationForm
         accommodationId={accommodationId}
         maxGuests={maxGuests}
-        initialCheckIn={checkIn}
-        initialCheckOut={checkOut}
+        checkIn={checkIn}
+        checkOut={checkOut}
       />
     </div>
   );
