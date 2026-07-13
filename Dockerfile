@@ -18,7 +18,7 @@ ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
 ENV AUTH_URL=$AUTH_URL
 ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospedagem
 
-RUN pnpm exec prisma generate
+RUN pnpm run db:generate
 RUN pnpm build
 
 # ── Stage 2: runner ───────────────────────────────────────────────────────────
