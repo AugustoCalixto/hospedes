@@ -3,6 +3,9 @@ import { Geist } from "next/font/google";
 import { DemoBanner } from "@/components/demo-banner";
 import "./globals.css";
 
+/** Evita pré-render no build Docker (sem Postgres no stage de build). */
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
