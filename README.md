@@ -2,6 +2,8 @@
 
 Site institucional com sistema de reservas para pousada e locações de temporada.
 
+> **Papel na Natcore:** demonstração genérica em `hospedagem.natcore.com.br` (subdomínio reservado). Nome comercial: “Desenvolvimento de site para hospedagens por temporada”. Deploy sidecar: `marcae/docker-compose.demos.yml`.
+
 ## Stack
 
 - Next.js 16 (App Router) + TypeScript
