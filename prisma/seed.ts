@@ -21,7 +21,10 @@ async function main() {
 
   await prisma.siteSettings.upsert({
     where: { id: "default" },
-    update: {},
+    update: {
+      contactPhone: "(35) 98433-8063",
+      contactWhatsapp: "5535984338063",
+    },
     create: {
       id: "default",
       siteName: "Pousada Vale Verde",
@@ -31,8 +34,8 @@ async function main() {
       aboutTitle: "Nossa História",
       aboutContent:
         "Há mais de 15 anos recebendo hóspedes com carinho e hospitalidade. Nossa pousada nasceu do sonho de compartilhar os melhores destinos serranos de Minas Gerais e São Paulo.",
-      contactPhone: "(35) 99999-0000",
-      contactWhatsapp: "5535999990000",
+      contactPhone: "(35) 98433-8063",
+      contactWhatsapp: "5535984338063",
       contactEmail: "contato@pousadavaleverde.com.br",
       contactAddress: "Estrada da Serra, km 12 — Monte Verde, MG",
       notificationEmail: "admin@example.com",

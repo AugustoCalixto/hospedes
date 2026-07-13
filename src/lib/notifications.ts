@@ -1,4 +1,11 @@
 import { prisma } from "./prisma";
+import {
+  buildWhatsAppLink,
+  resolveWhatsAppPhone,
+  whatsAppAdminNewReservationMessage,
+} from "./whatsapp";
+
+export { buildWhatsAppLink } from "./whatsapp";
 
 export async function getSiteSettings() {
   return prisma.siteSettings.upsert({
@@ -6,14 +13,6 @@ export async function getSiteSettings() {
     update: {},
     create: { id: "default" },
   });
-}
-
-export function buildWhatsAppLink(
-  phone: string,
-  message: string,
-): string {
-  const cleaned = phone.replace(/\D/g, "");
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
 }
 
 export async function sendNotificationEmail(
@@ -73,12 +72,14 @@ export async function notifyNewReservation(data: {
 
   await sendNotificationEmail(subject, html);
 
-  if (settings.contactWhatsapp) {
-    const message = `Nova reserva: ${data.accommodationName}\n${data.guestName} — ${data.checkIn} a ${data.checkOut}`;
-    return buildWhatsAppLink(settings.contactWhatsapp, message);
-  }
-
-  return null;
+  const message = whatsAppAdminNewReservationMessage({
+    code: data.code,
+    accommodationName: data.accommodationName,
+    guestName: data.guestName,
+    checkIn: data.checkIn,
+    checkOut: data.checkOut,
+  });
+  return buildWhatsAppLink(resolveWhatsAppPhone(settings.contactWhatsapp), message);
 }
 
 export async function notifyContactMessage(data: {

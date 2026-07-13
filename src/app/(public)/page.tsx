@@ -3,7 +3,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/notifications";
 import { AccommodationCard } from "@/components/accommodation/accommodation-card";
-import { Button } from "@/components/ui/button";
+import { HomeHeroSection } from "@/components/home/home-hero-section";
+import { ReservationCtaSection } from "@/components/home/reservation-cta-section";
 import { Star } from "lucide-react";
 
 export default async function HomePage() {
@@ -45,29 +46,12 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
-        <Image
-          src={heroImage}
-          alt="Pousada"
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 mx-auto max-w-3xl px-4 text-center text-white">
-          <h1 className="text-4xl font-bold md:text-5xl">{settings.homeHeroTitle}</h1>
-          <p className="mt-4 text-lg text-stone-100">{settings.homeHeroSubtitle}</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Button asChild size="lg">
-              <Link href="/acomodacoes">Ver acomodações</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-              <Link href="/contato">Fale conosco</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <HomeHeroSection
+        title={settings.homeHeroTitle}
+        subtitle={settings.homeHeroSubtitle}
+        imageUrl={heroImage}
+        siteName={settings.siteName}
+      />
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="text-2xl font-bold text-stone-900">Destaques</h2>
@@ -133,17 +117,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="bg-emerald-800 py-16 text-white">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-2xl font-bold">Pronto para sua próxima escapada?</h2>
-          <p className="mt-3 text-emerald-100">
-            Consulte disponibilidade e solicite sua reserva em poucos cliques.
-          </p>
-          <Button asChild size="lg" className="mt-6 bg-white text-emerald-800 hover:bg-stone-100">
-            <Link href="/acomodacoes">Fazer reserva</Link>
-          </Button>
-        </div>
-      </section>
+      <ReservationCtaSection />
     </>
   );
 }

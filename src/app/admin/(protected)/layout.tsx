@@ -10,11 +10,13 @@ import {
   LogOut,
   Building2,
   ClipboardList,
+  MapPin,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/acomodacoes", label: "Acomodações", icon: Building2 },
+  { href: "/admin/cidades", label: "Cidades", icon: MapPin },
   { href: "/admin/reservas", label: "Reservas", icon: ClipboardList },
   { href: "/admin/calendario", label: "Calendário", icon: Calendar },
   { href: "/admin/conteudo", label: "Conteúdo", icon: FileText },

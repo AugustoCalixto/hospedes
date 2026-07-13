@@ -4,7 +4,6 @@ import {
   updateSiteSettings,
   createReview,
   deleteReview,
-  updateCity,
 } from "@/lib/admin-actions";
 import { ContactSettingsFields } from "@/components/admin/contact-settings-fields";
 import { Label } from "@/components/ui/label";
@@ -13,17 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminContentPage() {
-  const [settings, reviews, cities] = await Promise.all([
+  const [settings, reviews] = await Promise.all([
     getSiteSettings(),
     prisma.review.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.city.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   return (
     <div className="space-y-12">
       <div>
         <h1 className="text-2xl font-bold">Conteúdo</h1>
-        <p className="mt-2 text-stone-600">Edite textos do site, avaliações e cidades</p>
+        <p className="mt-2 text-stone-600">Edite textos do site e avaliações</p>
       </div>
 
       <section className="rounded-xl border border-stone-200 bg-white p-6">
@@ -120,45 +118,6 @@ export default async function AdminContentPage() {
           ))}
         </ul>
       </section>
-
-      {cities.map((city) => (
-        <section key={city.id} className="rounded-xl border border-stone-200 bg-white p-6">
-          <h2 className="text-lg font-semibold">Cidade: {city.name}</h2>
-          <form action={updateCity.bind(null, city.id)} className="mt-6 space-y-4">
-            <div>
-              <Label htmlFor={`name-${city.id}`}>Nome</Label>
-              <Input id={`name-${city.id}`} name="name" defaultValue={city.name} required />
-            </div>
-            <div>
-              <Label htmlFor={`desc-${city.id}`}>Descrição</Label>
-              <Textarea id={`desc-${city.id}`} name="description" rows={4} defaultValue={city.description} required />
-            </div>
-            <div>
-              <Label htmlFor={`hero-${city.id}`}>Imagem hero (URL)</Label>
-              <Input id={`hero-${city.id}`} name="heroImage" defaultValue={city.heroImage || ""} />
-            </div>
-            <div>
-              <Label htmlFor={`attr-${city.id}`}>Atrações (uma por linha)</Label>
-              <Textarea
-                id={`attr-${city.id}`}
-                name="attractions"
-                rows={4}
-                defaultValue={(city.attractions as string[]).join("\n")}
-              />
-            </div>
-            <div>
-              <Label htmlFor={`gal-${city.id}`}>Galeria (URLs, uma por linha)</Label>
-              <Textarea
-                id={`gal-${city.id}`}
-                name="gallery"
-                rows={3}
-                defaultValue={(city.gallery as string[]).join("\n")}
-              />
-            </div>
-            <Button type="submit">Salvar {city.name}</Button>
-          </form>
-        </section>
-      ))}
     </div>
   );
 }

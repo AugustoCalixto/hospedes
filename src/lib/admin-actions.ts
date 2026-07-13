@@ -32,6 +32,25 @@ function parseJsonArray(value: FormDataEntryValue | null): string[] {
   }
 }
 
+function parseCityFormData(formData: FormData) {
+  return {
+    name: formData.get("name"),
+    description: formData.get("description"),
+    heroImage: formData.get("heroImage")?.toString().trim() || undefined,
+    attractions: parseJsonArray(formData.get("attractions")),
+    gallery: parseJsonArray(formData.get("gallery")),
+  };
+}
+
+function revalidateCityPaths() {
+  revalidatePath("/admin/cidades");
+  revalidatePath("/admin/conteudo");
+  revalidatePath("/admin/acomodacoes");
+  revalidatePath("/");
+  revalidatePath("/acomodacoes");
+  revalidatePath("/cidades");
+}
+
 export async function createCityQuick(name: string) {
   await requireAuth();
   const slug = slugify(name);
@@ -47,8 +66,27 @@ export async function createCityQuick(name: string) {
   });
 
   revalidatePath("/admin/acomodacoes");
+  revalidatePath("/admin/cidades");
   revalidatePath("/admin/conteudo");
   return city;
+}
+
+export async function createCity(formData: FormData) {
+  await requireAuth();
+
+  const parsed = citySchema.safeParse(parseCityFormData(formData));
+  if (!parsed.success) throw new Error("Dados inválidos");
+
+  const slug = slugify(parsed.data.name);
+  const existing = await prisma.city.findUnique({ where: { slug } });
+  if (existing) throw new Error("Já existe uma cidade com esse nome");
+
+  const created = await prisma.city.create({
+    data: { ...parsed.data, slug },
+  });
+
+  revalidateCityPaths();
+  redirect(`/admin/cidades/${created.id}?novo=1`);
 }
 
 export async function createAccommodation(formData: FormData) {
@@ -255,17 +293,32 @@ export async function deleteReview(id: string) {
 export async function updateCity(id: string, formData: FormData) {
   await requireAuth();
 
-  const parsed = citySchema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description"),
-    heroImage: formData.get("heroImage") || undefined,
-    attractions: formData.get("attractions")?.toString().split("\n").filter(Boolean) || [],
-    gallery: formData.get("gallery")?.toString().split("\n").filter(Boolean) || [],
-  });
-
+  const parsed = citySchema.safeParse(parseCityFormData(formData));
   if (!parsed.success) throw new Error("Dados inválidos");
 
-  await prisma.city.update({ where: { id }, data: parsed.data });
-  revalidatePath("/admin/conteudo");
-  revalidatePath("/cidades");
+  const slug = slugify(parsed.data.name);
+  const slugTaken = await prisma.city.findFirst({
+    where: { slug, NOT: { id } },
+  });
+  if (slugTaken) throw new Error("Já existe outra cidade com esse nome");
+
+  await prisma.city.update({
+    where: { id },
+    data: { ...parsed.data, slug },
+  });
+
+  revalidateCityPaths();
+}
+
+export async function deleteCity(id: string) {
+  await requireAuth();
+
+  const accommodationCount = await prisma.accommodation.count({ where: { cityId: id } });
+  if (accommodationCount > 0) {
+    throw new Error("Não é possível excluir uma cidade com acomodações vinculadas");
+  }
+
+  await prisma.city.delete({ where: { id } });
+  revalidateCityPaths();
+  redirect("/admin/cidades");
 }

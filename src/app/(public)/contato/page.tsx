@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { getSiteSettings, buildWhatsAppLink } from "@/lib/notifications";
+import { getSiteSettings } from "@/lib/notifications";
+import {
+  buildWhatsAppLink,
+  buildWhatsAppMessage,
+  resolveWhatsAppPhone,
+} from "@/lib/whatsapp";
 import { ContactForm } from "@/components/contact/contact-form";
 import { Button } from "@/components/ui/button";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
@@ -11,9 +16,14 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const settings = await getSiteSettings();
 
-  const whatsappHref = settings.contactWhatsapp
-    ? buildWhatsAppLink(settings.contactWhatsapp, "Olá! Gostaria de mais informações.")
-    : null;
+  const whatsappHref = buildWhatsAppLink(
+    resolveWhatsAppPhone(settings.contactWhatsapp),
+    buildWhatsAppMessage({
+      page: "contact",
+      siteName: settings.siteName,
+      placeName: settings.siteName,
+    }),
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -51,14 +61,12 @@ export default async function ContactPage() {
               </div>
             </div>
           )}
-          {whatsappHref && (
-            <Button asChild>
-              <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </a>
-            </Button>
-          )}
+          <Button asChild>
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp
+            </a>
+          </Button>
 
           {settings.mapLat && settings.mapLng && (
             <div className="mt-8 aspect-video overflow-hidden rounded-xl">

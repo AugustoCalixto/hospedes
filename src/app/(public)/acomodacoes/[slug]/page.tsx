@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { getAccommodationBySlug } from "@/lib/accommodations";
-import { getSiteSettings, buildWhatsAppLink } from "@/lib/notifications";
+import { getSiteSettings } from "@/lib/notifications";
+import {
+  buildWhatsAppLink,
+  buildWhatsAppMessage,
+  resolveWhatsAppPhone,
+} from "@/lib/whatsapp";
 import { formatCurrency } from "@/lib/utils";
 import { getAccommodationTypeLabel } from "@/lib/validations";
 import { BookingSection } from "@/components/booking/booking-section";
+import { AccommodationPhotoGallery } from "@/components/accommodation/accommodation-photo-gallery";
 import { ShareButton } from "@/components/accommodation/share-button";
 import { Button } from "@/components/ui/button";
 import { Bed, Bath, Users, Home, MessageCircle } from "lucide-react";
@@ -40,12 +45,17 @@ export default async function AccommodationDetailPage({ params }: Props) {
   const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
   const pageUrl = `${baseUrl}/acomodacoes/${accommodation.slug}`;
 
-  const whatsappHref = settings.contactWhatsapp
-    ? buildWhatsAppLink(
-        settings.contactWhatsapp,
-        `Olá! Tenho interesse no ${accommodation.name}.`,
-      )
-    : null;
+  const whatsappHref = buildWhatsAppLink(
+    resolveWhatsAppPhone(settings.contactWhatsapp),
+    buildWhatsAppMessage({
+      page: "accommodation",
+      siteName: settings.siteName,
+      placeName: accommodation.name,
+      city: accommodation.city.name,
+      type: getAccommodationTypeLabel(accommodation.type),
+      pricePerNight: accommodation.pricePerNight.toString(),
+    }),
+  );
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -93,35 +103,20 @@ export default async function AccommodationDetailPage({ params }: Props) {
         </div>
         <div className="flex gap-2">
           <ShareButton title={accommodation.name} url={pageUrl} />
-          {whatsappHref && (
-            <Button asChild variant="outline" size="sm">
-              <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </a>
-            </Button>
-          )}
+          <Button asChild variant="outline" size="sm">
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp
+            </a>
+          </Button>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-2 md:grid-cols-4 md:grid-rows-2">
-        {accommodation.photos.slice(0, 5).map((photo, i) => (
-          <div
-            key={photo.id}
-            className={`relative overflow-hidden rounded-xl bg-stone-100 ${
-              i === 0 ? "md:col-span-2 md:row-span-2 aspect-[4/3]" : "aspect-[4/3]"
-            }`}
-          >
-            <Image
-              src={photo.url}
-              alt={photo.alt || accommodation.name}
-              fill
-              className="object-cover"
-              sizes={i === 0 ? "50vw" : "25vw"}
-              priority={i === 0}
-            />
-          </div>
-        ))}
+      <div className="mt-8">
+        <AccommodationPhotoGallery
+          photos={accommodation.photos}
+          accommodationName={accommodation.name}
+        />
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">
