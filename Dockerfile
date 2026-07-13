@@ -6,7 +6,8 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# ignore-scripts: hospedagem tem postinstall "prisma generate" antes do schema existir
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
@@ -18,7 +19,7 @@ ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
 ENV AUTH_URL=$AUTH_URL
 ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospedagem
 
-RUN pnpm run db:generate
+RUN pnpm rebuild && pnpm run db:generate
 RUN pnpm build
 
 # ── Stage 2: runner ───────────────────────────────────────────────────────────
